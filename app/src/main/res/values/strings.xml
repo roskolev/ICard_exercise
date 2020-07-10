@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Icard_ex</string>
+    <string name="_8942">⋮</string>
+    <string name="male_contacts">Male Contacts</string>
+    <string name="female_contacts">Female Contacts</string>
+    <string name="all_contacts">All Contacts</string>
+    <string name="search">search</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="country">Country:</string>
+    <string name="number">Number:</string>
+    <string name="email">Email:</string>
+    <string name="gender">Gender:</string>
+    <string name="forename">Forename:</string>
+    <string name="surname">Surname:</string>
+    <string name="enter_country">Enter country</string>
+    <string name="enter_surname">Enter Surname</string>
+    <string name="enter_forename">Enter Forename</string>
+    <string name="enter_email_address">Enter email address</string>
+    <string name="code">Code</string>
+    <string name="radio_male">Male</string>
+    <string name="radio_female">Female</string>
+    <string name="enter_phonenumber">Enter phone number</string>
+    <string name="quit">Quit</string>
+    <string name="confirm">Confirm</string>
+    <string name="app_contact">App Contact</string>
+</resources>
