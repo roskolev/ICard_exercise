@@ -20,118 +20,135 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var linearLayoutManager: LinearLayoutManager
-    private lateinit var adapter: RecyclerAdapter
-    private lateinit var dbHelper: DatabaseHelper
-    private val PERMISSIONS_REQUEST_READ_CONTACTS = 100
+    private lateinit var linearLayoutManager        :   LinearLayoutManager
+    private lateinit var contactsAdapter            :   ContactsRecyclerAdapter
+    private lateinit var dbHelper                   :   DatabaseHelper
+
+    private val PERMISSIONS_REQUEST_READ_CONTACTS   =   100
+
+    override fun onResume() {
+        setUpContactsRecyclerAdapter(dbHelper.getAllContacts())
+        invalidateOptionsMenu()
+        super.onResume()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        dbHelper = DatabaseHelper(this)
-        linearLayoutManager = LinearLayoutManager(this)
-        recycler.layoutManager = linearLayoutManager
-        val cursor = dbHelper.getAllContacts()
-        setUpRecyclerAdapter(cursor)
-        recycler.addItemDecoration(
-            DividerItemDecoration(recycler.context, linearLayoutManager.orientation))
+
+        dbHelper                            =   DatabaseHelper(this)
+        linearLayoutManager                 =   LinearLayoutManager(this)
+        contactsRecycler.layoutManager      =   linearLayoutManager
+
+        setUpContactsRecyclerAdapter(dbHelper.getAllContacts())
         setSupportActionBar(toolbar)
-        fab.setOnClickListener {
-            val intent = Intent(this, EditActivity::class.java)
-            startActivity(intent)
+
+        contactsRecycler.addItemDecoration(DividerItemDecoration(
+                                                                    contactsRecycler.context,
+                                                                    linearLayoutManager.orientation))
+
+        floatingActionButton.setOnClickListener {
+            startActivity(Intent(this, AddContactActivity::class.java))
         }
     }
 
     override fun onStart() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(
-                Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(Manifest.permission.READ_CONTACTS) !=
+                PackageManager.PERMISSION_GRANTED)
+        {
             requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS),
-                PERMISSIONS_REQUEST_READ_CONTACTS)
+                                PERMISSIONS_REQUEST_READ_CONTACTS)
         }
         super.onStart()
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.action_bar_menu, menu)
-        val searchItem = menu?.findItem(R.id.action_search)
-        if (searchItem != null) {
-            val searchView = searchItem.actionView as SearchView
-            searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+        val searchContactItem = menu?.findItem(R.id.action_search)
+
+        menuInflater.inflate(R.menu.action_bar_menu, menu)
+
+        if (searchContactItem != null) {
+            val searchContactsView      =   searchContactItem.actionView as SearchView
+
+            searchContactsView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(constraint: String): Boolean {
                     return true
                 }
 
                 override fun onQueryTextChange(partialvalue: String): Boolean {
-                    val cursor = dbHelper.filterContacts(partialvalue)
-                    setUpRecyclerAdapter(cursor)
+                    setUpContactsRecyclerAdapter(dbHelper.filterContacts(partialvalue))
                     return true
                 }
 
             })
         }
+
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_all -> {
-            val cursor = dbHelper.getAllContacts()
-            setUpRecyclerAdapter(cursor)
-            true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        var isOptionSelected = false
+        when (item.itemId) {
+            R.id.action_all -> {
+                setUpContactsRecyclerAdapter(dbHelper.getAllContacts())
+                isOptionSelected = true
+            }
+            R.id.action_male -> {
+                setUpContactsRecyclerAdapter(dbHelper.getMaleContacts())
+                isOptionSelected = true
+            }
+            R.id.action_female -> {
+                setUpContactsRecyclerAdapter(dbHelper.getFemaleContacts())
+                isOptionSelected = true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        R.id.action_male -> {
-            val cursor = dbHelper.getMaleContacts()
-            setUpRecyclerAdapter(cursor)
-            true
-        }
-        R.id.action_female -> {
-            val cursor = dbHelper.getFemaleContacts()
-            setUpRecyclerAdapter(cursor)
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
+        return isOptionSelected
     }
 
-    override fun onResume() {
-        val cursor = dbHelper.getAllContacts()
-        setUpRecyclerAdapter(cursor)
-        invalidateOptionsMenu()
-        super.onResume()
-    }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
                                             grantResults: IntArray) {
         if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                val cursor = dbHelper.getAllContacts()
-                setUpRecyclerAdapter(cursor)
+            if (grantResults[readContacts] == PackageManager.PERMISSION_GRANTED) {
+                setUpContactsRecyclerAdapter(dbHelper.getAllContacts())
             } else {
                  Toast.makeText(
-                     this, "Permission must be granted in order to display device contacts information",
+                     this, R.string.read_contacts_permission_needed,
                      Toast.LENGTH_LONG).show()
             }
         }
     }
-    private fun setUpRecyclerAdapter(cursor: Cursor){
-        val contactsList = mutableListOf<String>()
-        val idsList = mutableListOf<Int>()
-        with(cursor){
+
+    private fun setUpContactsRecyclerAdapter(contactsCursor: Cursor){
+        val contactsList    =   mutableListOf<String>()
+        val idsList         =   mutableListOf<Int>()
+        //TODO - MOVE TO NEW CLASS
+        with(contactsCursor){
             while (moveToNext()){
-                val forename = getString(getColumnIndexOrThrow(ContactsTable.COLUMN_FORENAME))
-                val surname = getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
-                val id = getInt(getColumnIndexOrThrow(BaseColumns._ID))
+                val forename    =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_FORENAME))
+                val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
+                val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
+
                 contactsList.add("$forename $surname")
                 idsList.add(id)
             }
         }
         val inAppNumber = contactsList.size
+
         //Get device contacts if we have permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(
                 Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
         } else {
-            val cr: ContentResolver = this.contentResolver
-            val sortOrder = "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
-            val deviceCursor = cr.query(
-                ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, sortOrder
-            )
+            val cr: ContentResolver         =   this.contentResolver
+            val sortOrder                   =   "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
+            val deviceCursor                =   cr.query(
+                                                     ContactsContract.Contacts.CONTENT_URI,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    sortOrder)
+
             if (deviceCursor != null) {
                 if (deviceCursor.count > 0) {
                     while (deviceCursor.moveToNext()) {
@@ -147,7 +164,12 @@ class MainActivity : AppCompatActivity() {
             }
             deviceCursor?.close()
         }
-        adapter = RecyclerAdapter(contactsList, idsList, inAppNumber)
-        recycler.adapter = adapter
+        contactsAdapter             =   ContactsRecyclerAdapter(contactsList, idsList, inAppNumber)
+        contactsRecycler.adapter    =    contactsAdapter
+        //TODO ENDS HERE
+    }
+
+    companion object {
+        const val   readContacts = 0
     }
 }

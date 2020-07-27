@@ -24,4 +24,20 @@
     <string name="quit">Quit</string>
     <string name="confirm">Confirm</string>
     <string name="app_contact">App Contact</string>
+    <string name="read_contacts_permission_needed">Permission must be granted in order to display device contacts information</string>
+    <string name="country_wrong">Please choose a country from the list</string>
+    <string name="name_wrong">Please fill the name fields</string>
+    <string name="gender_wrong">Please choose a gender</string>
+    <string name="email_wrong">Please enter valid email address</string>
+    <string name="number_wrong">Please enter valid phone number</string>
+    <string name="okay">OK</string>
+    <string name="edit_contact">Edit contact?</string>
+    <string name="create_contact">Create new contact?</string>
+    <string name="create_success">Contact created successfully!</string>
+    <string name="create_error">There was an error with creating the contact</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit_success">Contact successfully edited</string>
+    <string name="edit_error">There was an error with editing the contact</string>
+
+
 </resources>

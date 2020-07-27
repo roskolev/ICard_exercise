@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.recyclerview_item_row.view.*
 
 
-class RecyclerAdapter(private val contacts: MutableList<String>, private val ids: MutableList<Int>, private val inAppNumber: Int) :
-    RecyclerView.Adapter<RecyclerAdapter.MyViewHolder>() {
+class ContactsRecyclerAdapter(private val contacts: MutableList<String>, private val ids: MutableList<Int>, private val inAppNumber: Int) :
+    RecyclerView.Adapter<ContactsRecyclerAdapter.MyViewHolder>() {
     private lateinit var dbHelper: DatabaseHelper
     private lateinit var ctx : Context
     private var appContactsLength = 0
@@ -78,7 +78,7 @@ class RecyclerAdapter(private val contacts: MutableList<String>, private val ids
                         notifyDataSetChanged()
                     }
                     R.id.action_edit -> {
-                        val intent = Intent(ctx, EditActivity::class.java)
+                        val intent = Intent(ctx, EditContactActivity::class.java)
                         if(adapterPosition >= inAppNumber) {
                             intent.putExtra("ID", -2)
                             intent.putExtra("IDDevice", ids[position])
