@@ -11,10 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AddDeviceContactActivity"></activity>
         <activity android:name=".AddContactActivity" />
         <activity android:name=".EditContactActivity" />
-        <activity android:name=".ManageContactActivity" />
+        <activity android:name=".BaseContactActivity" />
         <activity android:name=".DetailsActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
