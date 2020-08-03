@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var linearLayoutManager        :   LinearLayoutManager
     private lateinit var dbHelper                   :   DatabaseHelper
 
-    private val PERMISSIONS_REQUEST_READ_CONTACTS   =   100
+    private val permissionRequestReadContacts   =   100
 
     override fun onResume() {
         setUpContactsRecyclerAdapter(allContacts)
@@ -56,13 +56,13 @@ class MainActivity : AppCompatActivity() {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M                                                  &&
                 checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
             )
-                requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS),PERMISSIONS_REQUEST_READ_CONTACTS)
+                requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS),permissionRequestReadContacts)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.action_bar_menu, menu)
 
-        val searchContactItem = menu?.findItem(R.id.action_search)
+        val searchContactItem = menu?.findItem(R.id.actionSearch)
 
         if (searchContactItem != null) {
             val searchContactsView      =   searchContactItem.actionView as SearchView
@@ -86,13 +86,13 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         var isOptionSelected = true
         when (item.itemId) {
-            R.id.action_all ->
+            R.id.actionAll      ->
                 setUpContactsRecyclerAdapter(allContacts)
-            R.id.action_male ->
+            R.id.actionMale     ->
                 setUpContactsRecyclerAdapter(getString(R.string.radio_male))
-            R.id.action_female ->
+            R.id.actionFemale   ->
                 setUpContactsRecyclerAdapter(getString(R.string.radio_female))
-            else ->{
+            else                ->{
                 isOptionSelected = false
                 super.onOptionsItemSelected(item)
             }
@@ -102,12 +102,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
                                             grantResults: IntArray) {
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+        if (requestCode == permissionRequestReadContacts) {
             if (grantResults[readContacts] == PackageManager.PERMISSION_GRANTED)
                 setUpContactsRecyclerAdapter(allContacts)
             else {
                  Toast.makeText(
-                     this, R.string.read_contacts_permission_needed,
+                     this,
+                     R.string.read_contacts_permission_needed,
                      Toast.LENGTH_LONG).show()
             }
         }
@@ -117,14 +118,14 @@ class MainActivity : AppCompatActivity() {
         val contactsHelper = ContactsHelper(this)
         when (filter) {
             allContacts                         ->  contactsRecycler.adapter    =   contactsHelper.initAllContacts()
-            getString(R.string.radio_male)      ->  contactsRecycler.adapter    =   contactsHelper.getMaleContacts()
-            getString(R.string.radio_female)    ->  contactsRecycler.adapter    =   contactsHelper.getFemaleContacts()
+            getString(R.string.radio_male)                              ->  contactsRecycler.adapter    =   contactsHelper.getContacts(true)
+            getString(R.string.radio_female)                            ->  contactsRecycler.adapter    =   contactsHelper.getContacts(false)
             else                                ->  contactsRecycler.adapter    =   contactsHelper.getFilteredContacts(filter)
         }
     }
 
     companion object {
-        const val   readContacts    = 0
-        const val   allContacts     = ""
+        const val   readContacts    =   0
+        const val   allContacts     =   ""
     }
 }

@@ -10,8 +10,9 @@ open class AddContactActivity : BaseContactActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         radioSex.clearCheck()
-        supportActionBar?.title     = getString(R.string.new_contact)
-        contactID                   =   intent.getIntExtra("IDDevice", -1)
+        contactsHelper              =   ContactsHelper(this)
+        supportActionBar?.title     =   getString(R.string.new_contact)
+        contactID                   =   intent.getIntExtra(getString(R.string.device_id), -1)
 
         if(contactID != defaultID)
             setUpContactInfo()
@@ -21,14 +22,17 @@ open class AddContactActivity : BaseContactActivity() {
         var isOptionSelected = true
 
         when (item.itemId) {
-            R.id.action_confirm ->
-                if(validation())
-                    buildConfirmDialog(-1, R.string.create_success, R.string.create_error, R.string.create_contact)
-            android.R.id.home ->
-                finish()
-            else -> {
-                super.onOptionsItemSelected(item)
+            R.id.actionConfirm  ->  if (validation())
+                                        buildConfirmDialog(
+                                                            -1,
+                                                            R.string.create_success,
+                                                            R.string.create_error,
+                                                            R.string.create_contact
+                                                            )
+            android.R.id.home   ->  finish()
+            else                ->  {
                 isOptionSelected = false
+                super.onOptionsItemSelected(item)
             }
         }
 
@@ -43,8 +47,9 @@ open class AddContactActivity : BaseContactActivity() {
         val contact = contactsHelper.getDeviceContact(contactID)
 
         editTextForename.setText(contact.forename)
-        editTextEmailAddress.setText(contact.email)
         editTextPhone.setText(contact.phone)
+        if(contact.email != getString(R.string.NA))
+            editTextEmailAddress.setText(contact.email)
     }
     companion object {
         const val   defaultID = -1

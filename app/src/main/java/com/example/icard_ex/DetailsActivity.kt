@@ -1,9 +1,7 @@
 package com.example.icard_ex
 
-import android.content.ContentResolver
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -21,10 +19,10 @@ class DetailsActivity : AppCompatActivity() {
 
         dbHelper        =   DatabaseHelper(this)
         contactsHelper  =   ContactsHelper(this)
-        id              =   intent.getIntExtra("ID", defaultID)
+        id              =   intent.getIntExtra(getString(R.string.id), defaultID)
 
         if(id == defaultID)
-            idDevice = intent.getIntExtra("IDDevice", defaultID)
+            idDevice    =   intent.getIntExtra(getString(R.string.device_id), defaultID)
 
         setSupportActionBar(toolbarDetails)
         setUpDetails()
@@ -39,23 +37,23 @@ class DetailsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         var isOptionSelected = true
         when (item.itemId) {
-            R.id.action_delete -> {
+            R.id.actionDelete   ->  {
                 dbHelper.deleteContact(id)
                 finish()
             }
-            R.id.action_edit -> {
+            R.id.actionEdit     ->  {
                 if (id == defaultID)
                     this.startActivity(
                         Intent(this, AddContactActivity::class.java)
-                            .putExtra("IDDevice", idDevice)
+                            .putExtra(getString(R.string.device_id), idDevice)
                     )
                 else
                     this.startActivity(
                         Intent(this, EditContactActivity::class.java)
-                            .putExtra("ID", id)
+                            .putExtra(getString(R.string.id), id)
                     )
             }
-            else -> {
+            else                ->  {
                 super.onOptionsItemSelected(item)
                 isOptionSelected = false
             }
@@ -69,7 +67,7 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     private fun setUpDetails(){
-        var contact = Contact()
+        val contact: Contact
         if(id != defaultID) {
             contact                 =   dbHelper.getContact(id)
             val countryCode         =   dbHelper.getCountryCode(contact.country)

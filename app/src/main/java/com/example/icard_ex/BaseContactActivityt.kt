@@ -28,14 +28,14 @@ abstract class BaseContactActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.edit_menu, menu)
+        menuInflater.inflate(R.menu.base_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     protected fun validation(): Boolean {
-        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-        val phonePattern = "^[0-9]*$"
-        var validated = false
+        val emailPattern    =   "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        val phonePattern    =   "^[0-9]*$"
+        var validated       =   false
 
         when{
             !dbHelper.countryInDB(countryValueField.text.toString())                                            ->
@@ -53,7 +53,8 @@ abstract class BaseContactActivity : AppCompatActivity() {
             editTextPhone.text.isEmpty() || !editTextPhone.text.matches(phonePattern.toRegex())                 ->
                 Toast.makeText(this, R.string.number_wrong, Toast.LENGTH_LONG).show()
 
-            else -> validated = true
+            else                                                                                                ->
+                validated = true
         }
 
         return validated
@@ -84,7 +85,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
 
         // Fix suggestions drop down list to drop on touch with no characters entered
         countryValueField.setOnTouchListener { _, _ ->
-            if (countryValueField.text.toString() != "") {
+            if (countryValueField.text.toString() != getString(R.string.empty)) {
                 countriesAdapter.filter.filter(null)
             }
             countryValueField.showDropDown()

@@ -1,28 +1,28 @@
 package com.example.icard_ex
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.recyclerview_item_row.view.*
 
 
-class ContactsRecyclerAdapter(private val contacts: MutableList<String>, private val ids: MutableList<Int>, private val inAppNumber: Int) :
+class ContactsRecyclerAdapter(private val contacts: MutableList<Contact>, private val inAppNumber: Int) :
     RecyclerView.Adapter<ContactsRecyclerAdapter.ItemViewHolder>() {
     private lateinit var dbHelper   :    DatabaseHelper
     private lateinit var ctx        :    Context
-
-    private var appContactsLength   =    0
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         ctx                 =   parent.context
         dbHelper            =   DatabaseHelper(ctx)
-        appContactsLength   =   contacts.size
 
         val contactItemView =   LayoutInflater.from(ctx)
                                     .inflate(R.layout.recyclerview_item_row, parent, false)
@@ -35,7 +35,7 @@ class ContactsRecyclerAdapter(private val contacts: MutableList<String>, private
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        holder.setContact(contacts[position])
+        holder.setContact(contacts[position].fullname)
     }
 
     inner class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener {
@@ -49,9 +49,9 @@ class ContactsRecyclerAdapter(private val contacts: MutableList<String>, private
             val intent = Intent(ctx, DetailsActivity::class.java)
             
             if(adapterPosition < inAppNumber)
-                intent.putExtra("ID", ids[adapterPosition])
+                intent.putExtra(ctx.getString(R.string.id), contacts[adapterPosition].id)
             else
-                intent.putExtra("IDDevice", ids[adapterPosition])
+                intent.putExtra(ctx.getString(R.string.device_id), contacts[adapterPosition].id)
             
             ctx.startActivity(intent)
         }
@@ -70,9 +70,15 @@ class ContactsRecyclerAdapter(private val contacts: MutableList<String>, private
 
         }
 
+        @SuppressLint("ResourceType")
         override fun onLongClick(v: View): Boolean {
             showOptionsPopup(itemView, adapterPosition)
-            itemView.setBackgroundColor(Color.parseColor("#ededed"))
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                itemView.setBackgroundColor(ctx.getColor(R.color.colorClicked))
+            else
+                itemView.setBackgroundColor(Color.parseColor(ctx.getString(R.color.colorClicked)))
+
             return true
         }
 
@@ -81,25 +87,24 @@ class ContactsRecyclerAdapter(private val contacts: MutableList<String>, private
             optionsPopup.inflate(R.menu.contact_menu)
 
             if(adapterPosition >= inAppNumber)
-                optionsPopup.menu.getItem(0).title = "Add contact to phone book"
+                optionsPopup.menu.getItem(0).title = ctx.getString(R.string.add_contact_to_phonebook)
 
             optionsPopup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
-                    R.id.action_delete -> {
-                        dbHelper.deleteContact(ids[position])
+                    R.id.actionDelete -> {
+                        dbHelper.deleteContact(contacts[position].id)
                         contacts.removeAt(position)
-                        ids.removeAt(position)
                         notifyItemRemoved(position)
                         notifyItemRangeChanged(position, contacts.size)
                         notifyDataSetChanged()
                     }
-                    R.id.action_edit -> {
+                    R.id.actionEdit -> {
                         if (adapterPosition >= inAppNumber) {
                             ctx.startActivity(Intent(ctx, AddContactActivity::class.java)
-                                                    .putExtra("IDDevice", ids[position]))
+                                                    .putExtra(ctx.getString(R.string.device_id), contacts[position].id))
                         } else {
                             ctx.startActivity(Intent(ctx, EditContactActivity::class.java)
-                                                    .putExtra("ID", ids[position]))
+                                                    .putExtra(ctx.getString(R.string.id), contacts[position].id))
                         }
                     }
                 }

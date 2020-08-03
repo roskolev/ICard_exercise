@@ -9,7 +9,7 @@ class EditContactActivity : BaseContactActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        contactID = intent.getIntExtra("ID", 0)
+        contactID = intent.getIntExtra(getString(R.string.id), 0)
         setUpEditView()
     }
 
@@ -41,12 +41,15 @@ class EditContactActivity : BaseContactActivity() {
         var isOptionSelected = true
 
         when (item.itemId) {
-            R.id.action_confirm ->
-                if (validation())
-                    buildConfirmDialog(0, R.string.edit_success, R.string.edit_error, R.string.edit_contact)
-            android.R.id.home ->
-                finish()
-            else -> {
+            R.id.actionConfirm  ->  if (validation())
+                                        buildConfirmDialog(
+                                                            0,
+                                                            R.string.edit_success,
+                                                            R.string.edit_error,
+                                                            R.string.edit_contact
+                                        )
+            android.R.id.home   ->  finish()
+            else                ->  {
                 isOptionSelected = false
                 super.onOptionsItemSelected(item)
             }
