@@ -1,24 +1,29 @@
 package com.example.icard_ex
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
-import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.icard_ex.models.Contact
+import com.example.icard_ex.models.Country
+import com.example.icard_ex.recyclers.CountriesRecyclerAdapter
 import kotlinx.android.synthetic.main.activity_base_contact.*
+import kotlinx.android.synthetic.main.countries_dialog.*
 
 abstract class BaseContactActivity : AppCompatActivity() {
-    protected lateinit var dbHelper: DatabaseHelper
-
+    protected lateinit var dbHelper :   DatabaseHelper
+    private lateinit var countries  :   MutableList<Country>
+    lateinit var dialog             :   Dialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_contact)
-
         dbHelper = DatabaseHelper(this)
 
         setSupportActionBar(toolbarEdit)
@@ -26,7 +31,6 @@ abstract class BaseContactActivity : AppCompatActivity() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_action_quit)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.base_menu, menu)
         return super.onCreateOptionsMenu(menu)
@@ -38,7 +42,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
         var validated       =   false
 
         when{
-            !dbHelper.countryInDB(countryValueField.text.toString())                                            ->
+            !dbHelper.countryInDB(searchCountryDialog.text.toString())                                           ->
                 Toast.makeText(this, R.string.country_wrong, Toast.LENGTH_LONG).show()
 
             editTextForename.text.isEmpty() || editTextSurname.text.isEmpty()                                   ->
@@ -53,8 +57,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
             editTextPhone.text.isEmpty() || !editTextPhone.text.matches(phonePattern.toRegex())                 ->
                 Toast.makeText(this, R.string.number_wrong, Toast.LENGTH_LONG).show()
 
-            else                                                                                                ->
-                validated = true
+            else -> validated = true
         }
 
         return validated
@@ -63,44 +66,40 @@ abstract class BaseContactActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setUpCountryField() {
         editTextPhoneCode.keyListener   =   null
-        val countries                   =   dbHelper.getAllCountries()
-        val countriesAdapter            =   ArrayAdapter(this, android.R.layout.simple_list_item_1, countries)
+        dialog                          =   Dialog(this)
 
-        countryValueField.setAdapter(countriesAdapter)
+        dialog.setContentView(R.layout.countries_dialog)
 
-        countryValueField.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {
-                val code = dbHelper.getCountryCode(s.toString())
-                if (code != 0) {
-                    editTextPhoneCode.setText(getString(R.string.country_code, code))
-                }
+        countries                           =   dbHelper.getAllCountries()
+        dialog.countryList.layoutManager    =   LinearLayoutManager(this)
+        dialog.countryList.adapter          =   CountriesRecyclerAdapter(this, countries, dialog)
+        dialog.setOnDismissListener {
+            dialog.searchCountry.setText("")
+        }
+
+        dialog.searchCountry.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {}
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(partialValue: CharSequence, start: Int, before: Int, count: Int) {
+                (dialog.countryList.adapter as CountriesRecyclerAdapter).updateList(dbHelper.getFilteredCountries(partialValue))
             }
-
-            override fun beforeTextChanged( s: CharSequence, start: Int, count: Int, after: Int )
-            {}
-
-            override fun onTextChanged( s: CharSequence, start: Int, before: Int, count: Int )
-            {}
         })
 
-        // Fix suggestions drop down list to drop on touch with no characters entered
-        countryValueField.setOnTouchListener { _, _ ->
-            if (countryValueField.text.toString() != getString(R.string.empty)) {
-                countriesAdapter.filter.filter(null)
-            }
-            countryValueField.showDropDown()
+        searchCountryDialog.setOnTouchListener { _, _ ->
+            dialog.show()
             false
         }
+
     }
 
     protected fun buildConfirmDialog(errorCode: Long, successString: Int, errorString: Int, titleString: Int){
         val contact = Contact(
-                                editTextForename.text.toString(),
-                                editTextSurname.text.toString(),
-                                editTextEmailAddress.text.toString(),
-                                editTextPhone.text.toString(),
-                                findViewById<RadioButton>(radioSex.checkedRadioButtonId).text.toString(),
-                                countryValueField.text.toString()
+            editTextForename.text.toString(),
+            editTextSurname.text.toString(),
+            editTextEmailAddress.text.toString(),
+            editTextPhone.text.toString(),
+            findViewById<RadioButton>(radioSex.checkedRadioButtonId).text.toString(),
+            searchCountryDialog.id
         )
         AlertDialog.Builder(this)
             .setIcon(R.drawable.ic_action_contact)

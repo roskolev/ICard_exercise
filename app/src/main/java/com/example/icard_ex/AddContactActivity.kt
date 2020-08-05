@@ -2,11 +2,13 @@ package com.example.icard_ex
 
 import android.os.Bundle
 import android.view.MenuItem
+import com.example.icard_ex.models.Contact
 import kotlinx.android.synthetic.main.activity_base_contact.*
 
 open class AddContactActivity : BaseContactActivity() {
     private lateinit var contactsHelper :   ContactsHelper
     private var contactID               =   0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         radioSex.clearCheck()

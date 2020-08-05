@@ -13,7 +13,7 @@
     <string name    =   "gender">                          Gender:</string>
     <string name    =   "forename">                        Forename:</string>
     <string name    =   "surname">                         Surname:</string>
-    <string name    =   "enter_country">                   Enter country</string>
+    <string name    =   "enter_country">                   Choose country</string>
     <string name    =   "enter_surname">                   Enter Surname</string>
     <string name    =   "enter_forename">                  Enter Forename</string>
     <string name    =   "enter_email_address">             Enter email address</string>
@@ -39,7 +39,7 @@
     <string name    =   "edit_success">                    Contact successfully edited</string>
     <string name    =   "edit_error">                      There was an error with editing the contact</string>
     <string name    =   "title_edit">                      Edit contact</string>
-    <string name    =   "country_code">                    +%1$d</string>
+    <string name    =   "country_code">                    +%1$s</string>
     <string name    =   "new_contact">                     New contact</string>
     <string name    =   "whole_number">                    +%1$d%2$s</string>
     <string name    =   "NA">                              N/A</string>
@@ -47,4 +47,5 @@
     <string name    =   "device_id">                       IDDevice</string>
     <string name    =   "empty" />
     <string name    =   "id">                              ID</string>
+    <string name    =   "country_spin_title">              Choose a country</string>
 </resources>

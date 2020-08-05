@@ -5,6 +5,8 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
+import com.example.icard_ex.models.Contact
+import com.example.icard_ex.models.Country
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
@@ -14,7 +16,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         // Insert Countries and their phone codes into the database
         for((index, value) in countries.withIndex()){
             db.execSQL("INSERT into ${CountriesTable.TABLE_NAME}("+
-                                "${CountriesTable.COLUMN_COUNTRY}, " +
+                                "${CountriesTable.COLUMN_NAME}, " +
                                 "${CountriesTable.COLUMN_CODE}) " +
                                 "values('$value', " + countrycodes[index] + ")"
             )
@@ -33,12 +35,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL(SQL_DELETE_TABLE_COUNTRY)
         onCreate(db)
     }
+
     fun getAllContacts(): MutableList<Contact> {
         val contactList =   mutableListOf<Contact>()
         val db          =   this.readableDatabase
         val projection  =   arrayOf(BaseColumns._ID, ContactsTable.COLUMN_FORENAME, ContactsTable.COLUMN_SURNAME)
         val sortOrder   =   "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
-        val cursor      = db.query(
+        val cursor      =   db.query(
                                     ContactsTable.TABLE_NAME,
                                     projection,
                                     null,
@@ -54,7 +57,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id))
+                contactList.add(Contact("$forename $surname", id)
+                )
             }
         }
 
@@ -63,12 +67,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     fun getMaleContacts(): MutableList<Contact> {
         val contactList     =   mutableListOf<Contact>()
-        val db              =    this.readableDatabase
-        val projection      =    arrayOf(BaseColumns._ID, ContactsTable.COLUMN_FORENAME, ContactsTable.COLUMN_SURNAME)
-        val sortOrder       =    "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
-        val selection       =    "${ContactsTable.COLUMN_GENDER} = ?"
-        val selectionArgs   =    arrayOf("Male")
-        val cursor          = db.query(
+        val db              =   this.readableDatabase
+        val projection      =   arrayOf(BaseColumns._ID, ContactsTable.COLUMN_FORENAME, ContactsTable.COLUMN_SURNAME)
+        val sortOrder       =   "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
+        val selection       =   "${ContactsTable.COLUMN_GENDER} = ?"
+        val selectionArgs   =   arrayOf("Male")
+        val cursor          =   db.query(
                                         ContactsTable.TABLE_NAME,
                                         projection,
                                         selection,
@@ -84,7 +88,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id))
+                contactList.add(Contact("$forename $surname", id)
+                )
             }
         }
 
@@ -98,7 +103,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val sortOrder       =   "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
         val selection       =   "${ContactsTable.COLUMN_GENDER} = ?"
         val selectionArgs   =   arrayOf("Female")
-        val cursor          = db.query(
+        val cursor          =   db.query(
                                         ContactsTable.TABLE_NAME,
                                         projection,
                                         selection,
@@ -114,7 +119,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id))
+                contactList.add(Contact("$forename $surname", id)
+                )
             }
         }
 
@@ -124,7 +130,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun filterContacts(constraint: String): MutableList<Contact> {
         val contactList =   mutableListOf<Contact>()
         val db          =   this.readableDatabase
-        val cursor      = db.rawQuery(
+        val cursor      =   db.rawQuery(
                                     "SELECT ${ContactsTable.COLUMN_FORENAME}, " +
                                         "${ContactsTable.COLUMN_SURNAME}, " +
                                         "${BaseColumns._ID} FROM ${ContactsTable.TABLE_NAME} " +
@@ -143,7 +149,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id))
+                contactList.add(
+                    Contact("$forename $surname", id)
+                )
             }
         }
 
@@ -155,20 +163,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DELETE FROM ${ContactsTable.TABLE_NAME} WHERE ${BaseColumns._ID} is $id")
     }
 
-    fun getContact(id: Int): Contact{
+    fun getContact(id: Int): Contact {
         val db              =   this.readableDatabase
-        val selection       =   "${BaseColumns._ID} = ?"
+        val table           =   "${ContactsTable.TABLE_NAME} as contacts INNER JOIN ${CountriesTable.TABLE_NAME} as countries ON ${ContactsTable.COLUMN_COUNTRY} = countries.${BaseColumns._ID}"
+        val selection       =   "contacts.${BaseColumns._ID} = ?"
         val selectionArgs   =   arrayOf("$id")
         val projection      =   arrayOf(
                                             ContactsTable.COLUMN_FORENAME,
                                             ContactsTable.COLUMN_SURNAME,
-                                            ContactsTable.COLUMN_COUNTRY,
                                             ContactsTable.COLUMN_EMAIL,
                                             ContactsTable.COLUMN_GENDER,
-                                            ContactsTable.COLUMN_NUMBER
+                                            ContactsTable.COLUMN_NUMBER,
+                                            CountriesTable.COLUMN_NAME,
+                                            CountriesTable.COLUMN_CODE,
+                                            "countries.${BaseColumns._ID}"
         )
         val cursor          =   db.query(
-                                            ContactsTable.TABLE_NAME,
+                                            table,
                                             projection,
                                             selection,
                                             selectionArgs,
@@ -178,45 +189,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         )
 
         cursor.moveToNext()
-        val contact =   Contact(
-                                cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_FORENAME)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_EMAIL)),
-                                cursor.getInt(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_NUMBER)).toString(),
-                                cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_GENDER)),
-                                cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_COUNTRY))
-        )
+        val country = Country(
+            cursor.getString(cursor.getColumnIndexOrThrow(CountriesTable.COLUMN_NAME)),
+            cursor.getInt(cursor.getColumnIndexOrThrow(CountriesTable.COLUMN_CODE)),
+            cursor.getInt(cursor.getColumnIndexOrThrow("countries.${BaseColumns._ID}")))
+
+        val contact = Contact(
+            cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_FORENAME)),
+            cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME)),
+            cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_EMAIL)),
+            cursor.getInt(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_NUMBER)).toString(),
+            cursor.getString(cursor.getColumnIndexOrThrow(ContactsTable.COLUMN_GENDER)),
+            country)
+
         cursor.close()
         return contact
     }
-    fun getCountryCode(country: String): Int{
-        val db              =   this.readableDatabase
-        val projection      =   arrayOf(CountriesTable.COLUMN_CODE)
-        val selection       =   "${CountriesTable.COLUMN_COUNTRY} = ?"
-        val selectionArgs   =   arrayOf(country)
-        var code            =   0
 
-        val cursor          = db.query(
-                                        CountriesTable.TABLE_NAME,
-                                        projection,
-                                        selection,
-                                        selectionArgs,
-                                        null,
-                                        null,
-                                        null
-        )
-
-        if(cursor.moveToNext())
-            code = cursor.getInt(cursor.getColumnIndexOrThrow((CountriesTable.COLUMN_CODE)))
-
-        cursor.close()
-        return code
-    }
-    fun getAllCountries(): Array<String>{
-        val countryList =   mutableListOf<String>()
+    fun getAllCountries(): MutableList<Country>{
+        val countryList =   mutableListOf<Country>()
         val db          =   this.readableDatabase
-        val projection  =   arrayOf(CountriesTable.COLUMN_COUNTRY)
-        val sortOrder   =   "${CountriesTable.COLUMN_COUNTRY} ASC"
+        val projection  =   arrayOf(BaseColumns._ID, CountriesTable.COLUMN_NAME, CountriesTable.COLUMN_CODE)
+        val sortOrder   =   "${CountriesTable.COLUMN_NAME} ASC"
         val cursor      =   db.query(
                                         CountriesTable.TABLE_NAME,
                                         projection,
@@ -229,17 +223,21 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         with(cursor){
             while (moveToNext()){
-                val country = getString(getColumnIndexOrThrow(CountriesTable.COLUMN_COUNTRY))
-                countryList.add(country)
+                getString(getColumnIndexOrThrow(CountriesTable.COLUMN_NAME))
+                val name    =   getString(getColumnIndexOrThrow(CountriesTable.COLUMN_NAME))
+                val code    =   getInt(getColumnIndexOrThrow(CountriesTable.COLUMN_CODE))
+                val id      =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
+                countryList.add(Country(name,code, id))
             }
         }
-        return countryList.toTypedArray()
+        return countryList
     }
+
     fun countryInDB(country: String): Boolean{
         var code            =   0
         val db              =   this.readableDatabase
         val projection      =   arrayOf(CountriesTable.COLUMN_CODE)
-        val selection       =   "${CountriesTable.COLUMN_COUNTRY} = ?"
+        val selection       =   "${CountriesTable.COLUMN_NAME} = ?"
         val selectionArgs   =   arrayOf(country)
         val cursor          =   db.query(
                                             CountriesTable.TABLE_NAME,
@@ -259,12 +257,41 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return code != 0
     }
 
+    fun getFilteredCountries(partialValue: CharSequence): MutableList<Country> {
+        val countryList             =   mutableListOf<Country>()
+        val db                      =   this.readableDatabase
+        val projection              =   arrayOf(BaseColumns._ID, CountriesTable.COLUMN_NAME, CountriesTable.COLUMN_CODE)
+        val selection               =   "${CountriesTable.COLUMN_NAME} LIKE ?"
+        val selectionArgs           =   arrayOf("$partialValue%")
+        val sortOrder               =   "${CountriesTable.COLUMN_NAME} ASC"
+        val cursor                  =   db.query(
+                                                CountriesTable.TABLE_NAME,
+                                                projection,
+                                                selection,
+                                                selectionArgs,
+                                                null,
+                                                null,
+                                                sortOrder
+        )
+
+        with(cursor){
+            while (moveToNext()){
+                getString(getColumnIndexOrThrow(CountriesTable.COLUMN_NAME))
+                val name    =   getString(getColumnIndexOrThrow(CountriesTable.COLUMN_NAME))
+                val code    =   getInt(getColumnIndexOrThrow(CountriesTable.COLUMN_CODE))
+                val id      =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
+                countryList.add(Country(name, code, id))
+            }
+        }
+        return countryList
+    }
+
     fun addContact(contact: Contact): Long {
         val db              =   this.writableDatabase
         val contentValues   =   ContentValues().apply{
                                                     put(ContactsTable.COLUMN_FORENAME, contact.forename)
                                                     put(ContactsTable.COLUMN_SURNAME, contact.surname)
-                                                    put(ContactsTable.COLUMN_COUNTRY, contact.country)
+                                                    put(ContactsTable.COLUMN_COUNTRY, contact.countryID)
                                                     put(ContactsTable.COLUMN_EMAIL, contact.email)
                                                     put(ContactsTable.COLUMN_NUMBER, contact.phone)
                                                     put(ContactsTable.COLUMN_GENDER, contact.gender)
@@ -280,7 +307,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val contentValues   =   ContentValues().apply{
                                                         put(ContactsTable.COLUMN_FORENAME, contact.forename)
                                                         put(ContactsTable.COLUMN_SURNAME, contact.surname)
-                                                        put(ContactsTable.COLUMN_COUNTRY, contact.country)
+                                                        put(ContactsTable.COLUMN_COUNTRY, contact.countryID)
                                                         put(ContactsTable.COLUMN_EMAIL, contact.email)
                                                         put(ContactsTable.COLUMN_NUMBER, contact.phone)
                                                         put(ContactsTable.COLUMN_GENDER, contact.gender)
@@ -298,14 +325,14 @@ object ContactsTable : BaseColumns {
     const val TABLE_NAME        =   "Contacts"
     const val COLUMN_FORENAME   =   "forename"
     const val COLUMN_SURNAME    =   "surname"
-    const val COLUMN_COUNTRY    =   "country"
+    const val COLUMN_COUNTRY    =   "countryID"
     const val COLUMN_EMAIL      =   "email"
     const val COLUMN_NUMBER     =   "phonenumber"
     const val COLUMN_GENDER     =   "gender"
 }
 object CountriesTable : BaseColumns {
     const val TABLE_NAME        =   "Countries"
-    const val COLUMN_COUNTRY    =   "country"
+    const val COLUMN_NAME       =   "country"
     const val COLUMN_CODE       =   "code"
 }
 private const val SQL_CREATE_TABLE_CONTACTS =
@@ -313,10 +340,12 @@ private const val SQL_CREATE_TABLE_CONTACTS =
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
             "${ContactsTable.COLUMN_FORENAME} TEXT," +
             "${ContactsTable.COLUMN_SURNAME} TEXT," +
-            "${ContactsTable.COLUMN_COUNTRY} TEXT," +
+            "${ContactsTable.COLUMN_COUNTRY} INTEGER," +
             "${ContactsTable.COLUMN_EMAIL} TEXT," +
             "${ContactsTable.COLUMN_NUMBER} ," +
-            "${ContactsTable.COLUMN_GENDER} TEXT )"
+            "${ContactsTable.COLUMN_GENDER} TEXT," +
+            "FOREIGN KEY(${ContactsTable.COLUMN_COUNTRY}) " +
+            "REFERENCES ${CountriesTable.TABLE_NAME}(${BaseColumns._ID}))"
 
 private const val SQL_POPULATE_TEST =
             "INSERT into ${ContactsTable.TABLE_NAME}(" +
@@ -327,7 +356,7 @@ private const val SQL_POPULATE_TEST =
             "${ContactsTable.COLUMN_NUMBER}," +
             "${ContactsTable.COLUMN_GENDER}) " +
             "values('Rostislav', 'Kolev', " +
-            "'Bulgaria', 'roskokolev@gmail.com', "+
+            "3, 'roskokolev@gmail.com', "+
             "896631746, 'Male')"
 private const val SQL_POPULATE_TEST_1 =
             "INSERT into ${ContactsTable.TABLE_NAME}(" +
@@ -338,13 +367,13 @@ private const val SQL_POPULATE_TEST_1 =
             "${ContactsTable.COLUMN_NUMBER}," +
             "${ContactsTable.COLUMN_GENDER}) " +
             "values('Svetoslava', 'Lazarova', " +
-            "'Greece', 'svetl@gmail.com', "+
+            "6, 'svetl@gmail.com', "+
             "896631745, 'Female')"
 
 private const val SQL_CREATE_TABLE_COUNTRIES=
             "CREATE TABLE ${CountriesTable.TABLE_NAME} (" +
             "${BaseColumns._ID} INTEGER PRIMARY KEY," +
-            "${CountriesTable.COLUMN_COUNTRY} TEXT," +
+            "${CountriesTable.COLUMN_NAME} TEXT," +
             "${CountriesTable.COLUMN_CODE})"
 
 private const val SQL_DELETE_TABLE_CONTACTS =   "DROP TABLE IF EXISTS ${ContactsTable.TABLE_NAME}"
@@ -355,14 +384,14 @@ private const val DATABASE_NAME             =   "ICard.db"
 
 private const val DATABASE_VERSION          =   2
 
-val countries       = arrayOf(
+private val countries       = arrayOf(
                             "Austria", "Albania", "Andorra", "Armenia", "Belarus", "Belgium",
                             "Bulgaria", "Croatia","Cyprus", "Czech Republic", "Denmark", "Estonia",
                             "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy",
                             "Kosovo", "Latvia", "Netherlands", "Norway", "Poland", "Portugal", "Romania",
                             "Russia", "Serbia", "Spain", "Switzerland", "Turkey", "United Kingdom"
 )
-val countrycodes    = arrayOf(
+private val countrycodes    = arrayOf(
                             43, 355, 376, 374, 375, 32, 359, 385, 357, 420, 45, 372, 358, 33, 49, 30,
                             36, 353, 39, 383, 371, 31, 47, 48, 351, 40, 7, 381, 34, 41, 90, 44
 )

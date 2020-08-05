@@ -6,6 +6,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.ContactsContract
+import com.example.icard_ex.models.Contact
+import com.example.icard_ex.recyclers.ContactsRecyclerAdapter
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 @Suppress("ControlFlowWithEmptyBody")
@@ -14,43 +19,69 @@ class ContactsHelper(context: Context) {
     private val ctx         =   context
 
     fun initAllContacts(): ContactsRecyclerAdapter {
-        val contactsList    =   dbHelper.getAllContacts()
-        val inAppNumber     =   contactsList.size
+        var contactsList        =   mutableListOf<Contact>()
+        val contactsListInPhone =   mutableListOf<Contact>()
+        var inAppNumber         =   0
 
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            ctx.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-        )
-        else {
-            //Get device contacts if we have read permission
-            val cr: ContentResolver     =   ctx.contentResolver
-            val sortOrder               =   "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
-            val deviceContactsCursor    =   cr.query(
-                                                      ContactsContract.Contacts.CONTENT_URI,
-                                                      null,
-                                                      null,
-                                                      null,
-                                                      sortOrder
+        val queryAppDB          =   GlobalScope.launch {
+            contactsList    =    dbHelper.getAllContacts()
+            inAppNumber     =    contactsList.size
+        }
+
+        runBlocking {
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                ctx.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
             )
+            else {
+                //Get device contacts if we have read permission
+                val cr: ContentResolver     =   ctx.contentResolver
+                val sortOrder               =   "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
+                val deviceContactsCursor    =   cr.query(
+                                                        ContactsContract.Contacts.CONTENT_URI,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        sortOrder
+                )
 
-            if (deviceContactsCursor != null) {
-                if (deviceContactsCursor.count > 0) {
-                    while (deviceContactsCursor.moveToNext()) {
-                        val id      =    deviceContactsCursor
-                                            .getString(deviceContactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID))
-                        val name    =    deviceContactsCursor
-                                            .getString(deviceContactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                if (deviceContactsCursor != null) {
+                    if (deviceContactsCursor.count > 0) {
+                        while (deviceContactsCursor.moveToNext()) {
+                            val id = deviceContactsCursor
+                                .getString(
+                                    deviceContactsCursor.getColumnIndexOrThrow(
+                                        ContactsContract.Contacts._ID
+                                    )
+                                )
+                            val name = deviceContactsCursor
+                                .getString(
+                                    deviceContactsCursor.getColumnIndexOrThrow(
+                                        ContactsContract.Contacts.DISPLAY_NAME
+                                    )
+                                )
 
-                        contactsList.add(Contact(name, id.toInt()))
+                            contactsListInPhone.add(
+                                Contact(
+                                    name,
+                                    id.toInt()
+                                )
+                            )
+                        }
                     }
                 }
+                deviceContactsCursor?.close()
             }
-            deviceContactsCursor?.close()
+            queryAppDB.join()
+            contactsListInPhone.forEach { contact  ->  contactsList.add(contact)}
         }
-        return ContactsRecyclerAdapter(contactsList, inAppNumber)
+        return ContactsRecyclerAdapter(
+            contactsList,
+            inAppNumber
+        )
     }
 
-    fun getContacts(isMale: Boolean): ContactsRecyclerAdapter{
+    fun getContacts(isMale: Boolean): ContactsRecyclerAdapter {
         val contactsList    =   if(isMale)
                                     dbHelper.getMaleContacts()
                                 else
@@ -58,51 +89,80 @@ class ContactsHelper(context: Context) {
 
         val inAppNumber     =   contactsList.size
 
-        return ContactsRecyclerAdapter(contactsList, inAppNumber)
+        return ContactsRecyclerAdapter(
+            contactsList,
+            inAppNumber
+        )
     }
 
     fun getFilteredContacts(filter: String): ContactsRecyclerAdapter {
-        val contactsList    =   dbHelper.filterContacts(filter)
-        val inAppNumber     =   contactsList.size
+        var contactsList        =   mutableListOf<Contact>()
+        val contactsListInPhone =   mutableListOf<Contact>()
+        var inAppNumber         =   0
 
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M                                                  &&
-            ctx.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-        )
-        else {
-            //Get device contacts if we have permission
-            val cr: ContentResolver     =   ctx.contentResolver
-            val selection               =   "${ContactsContract.Contacts.DISPLAY_NAME} LIKE ?"
-            val selectionArgs           =   arrayOf("%$filter%")
-            val sortOrder               =   "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
-            val deviceContactsCursor    =   cr.query(
+        val queryAppDB          =   GlobalScope.launch {
+            contactsList    =    dbHelper.filterContacts(filter)
+            inAppNumber     =    contactsList.size
+        }
+
+        runBlocking {
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                ctx.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+            )
+            else {
+                //Get device contacts if we have permission
+                val cr: ContentResolver     =   ctx.contentResolver
+                val selection               =   "${ContactsContract.Contacts.DISPLAY_NAME} LIKE ?"
+                val selectionArgs           =   arrayOf("%$filter%")
+                val sortOrder               =   "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
+                val deviceContactsCursor    =   cr.query(
                                                         ContactsContract.Contacts.CONTENT_URI,
                                                         null,
                                                         selection,
                                                         selectionArgs,
                                                         sortOrder
-            )
+                )
 
-            if (deviceContactsCursor != null) {
-                if (deviceContactsCursor.count > 0) {
-                    while (deviceContactsCursor.moveToNext()) {
-                        val id      =   deviceContactsCursor
-                                            .getString(deviceContactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID))
-                        val name    =   deviceContactsCursor
-                                            .getString(deviceContactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                if (deviceContactsCursor != null) {
+                    if (deviceContactsCursor.count > 0) {
+                        while (deviceContactsCursor.moveToNext()) {
+                            val id = deviceContactsCursor
+                                .getString(
+                                    deviceContactsCursor.getColumnIndexOrThrow(
+                                        ContactsContract.Contacts._ID
+                                    )
+                                )
+                            val name = deviceContactsCursor
+                                .getString(
+                                    deviceContactsCursor.getColumnIndexOrThrow(
+                                        ContactsContract.Contacts.DISPLAY_NAME
+                                    )
+                                )
 
-                        contactsList.add(Contact(name, id.toInt()))
+                            contactsListInPhone.add(
+                                Contact(
+                                    name,
+                                    id.toInt()
+                                )
+                            )
+                        }
                     }
                 }
+                deviceContactsCursor?.close()
             }
-            deviceContactsCursor?.close()
+            queryAppDB.join()
+            contactsListInPhone.forEach { contact  ->  contactsList.add(contact)}
         }
-        return ContactsRecyclerAdapter(contactsList, inAppNumber)
+        return ContactsRecyclerAdapter(
+            contactsList,
+            inAppNumber
+        )
     }
 
     fun getDeviceContact(contactID: Int): Contact {
         val cr                      :   ContentResolver = ctx.contentResolver
-        val contact                 =   Contact()
+        val contact                 = Contact()
         var deviceContactsCursor    =   cr.query(
                                                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                                                     null,

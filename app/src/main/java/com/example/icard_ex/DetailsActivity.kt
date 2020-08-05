@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.example.icard_ex.models.Contact
+import com.example.icard_ex.models.Country
 import kotlinx.android.synthetic.main.activity_details.*
 
 class DetailsActivity : AppCompatActivity() {
@@ -67,11 +69,13 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     private fun setUpDetails(){
-        val contact: Contact
+        val contact :   Contact
+        val country :   Country
         if(id != defaultID) {
-            contact                 =   dbHelper.getContact(id)
-            val countryCode         =   dbHelper.getCountryCode(contact.country)
-            numberValue.text        =   getString(R.string.whole_number, countryCode, contact.phone)
+            contact             =   dbHelper.getContact(id)
+            country             =   contact.country
+            numberValue.text    =   getString(R.string.whole_number, country.code, contact.phone)
+            countryValue.text   =   country.name
         }
         else{
             //Set Up device Contact
@@ -79,10 +83,9 @@ class DetailsActivity : AppCompatActivity() {
             numberValue.text = contact.phone
         }
 
-        countryValue.text       =   contact.country
         emailValue.text         =   contact.email
         genderValue.text        =   contact.gender
-        supportActionBar?.title =   "${contact.forename} ${contact.surname}"
+        supportActionBar?.title =   contact.fullname
 
         countryText.text        =   getString(R.string.country)
         countryText.textSize    =   16F

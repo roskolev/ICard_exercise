@@ -19,12 +19,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var linearLayoutManager        :   LinearLayoutManager
     private lateinit var dbHelper                   :   DatabaseHelper
 
-    private val permissionRequestReadContacts   =   100
+    private val permissionRequestReadContacts       =   100
 
     override fun onResume() {
+        super.onResume()
         setUpContactsRecyclerAdapter(allContacts)
         invalidateOptionsMenu()
-        super.onResume()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 setUpContactsRecyclerAdapter(getString(R.string.radio_male))
             R.id.actionFemale   ->
                 setUpContactsRecyclerAdapter(getString(R.string.radio_female))
-            else                ->{
+            else                -> {
                 isOptionSelected = false
                 super.onOptionsItemSelected(item)
             }

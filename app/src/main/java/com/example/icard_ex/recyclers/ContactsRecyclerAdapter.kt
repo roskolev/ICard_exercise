@@ -1,4 +1,4 @@
-package com.example.icard_ex
+package com.example.icard_ex.recyclers
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,14 +10,15 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
+import com.example.icard_ex.*
+import com.example.icard_ex.models.Contact
 import kotlinx.android.synthetic.main.recyclerview_item_row.view.*
 
 
 class ContactsRecyclerAdapter(private val contacts: MutableList<Contact>, private val inAppNumber: Int) :
     RecyclerView.Adapter<ContactsRecyclerAdapter.ItemViewHolder>() {
-    private lateinit var dbHelper   :    DatabaseHelper
+    private lateinit var dbHelper   : DatabaseHelper
     private lateinit var ctx        :    Context
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
