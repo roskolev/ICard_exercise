@@ -21,6 +21,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
     protected lateinit var dbHelper :   DatabaseHelper
     private lateinit var countries  :   MutableList<Country>
     lateinit var dialog             :   Dialog
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_base_contact)
@@ -31,6 +32,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_action_quit)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.base_menu, menu)
         return super.onCreateOptionsMenu(menu)
@@ -42,7 +44,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
         var validated       =   false
 
         when{
-            !dbHelper.countryInDB(searchCountryDialog.text.toString())                                           ->
+            !dbHelper.countryInDB(searchCountryDialog.text.toString())                                          ->
                 Toast.makeText(this, R.string.country_wrong, Toast.LENGTH_LONG).show()
 
             editTextForename.text.isEmpty() || editTextSurname.text.isEmpty()                                   ->
@@ -73,6 +75,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
         countries                           =   dbHelper.getAllCountries()
         dialog.countryList.layoutManager    =   LinearLayoutManager(this)
         dialog.countryList.adapter          =   CountriesRecyclerAdapter(this, countries, dialog)
+
         dialog.setOnDismissListener {
             dialog.searchCountry.setText("")
         }
@@ -101,6 +104,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
             findViewById<RadioButton>(radioSex.checkedRadioButtonId).text.toString(),
             searchCountryDialog.id
         )
+
         AlertDialog.Builder(this)
             .setIcon(R.drawable.ic_action_contact)
             .setTitle(titleString)

@@ -18,7 +18,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             db.execSQL("INSERT into ${CountriesTable.TABLE_NAME}("+
                                 "${CountriesTable.COLUMN_NAME}, " +
                                 "${CountriesTable.COLUMN_CODE}) " +
-                                "values('$value', " + countrycodes[index] + ")"
+                                "values('$value', " + countryCodes[index] + ")"
             )
         }
 
@@ -163,9 +163,45 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DELETE FROM ${ContactsTable.TABLE_NAME} WHERE ${BaseColumns._ID} is $id")
     }
 
+    fun addContact(contact: Contact): Long {
+        val db              =   this.writableDatabase
+        val contentValues   =   ContentValues().apply{
+            put(ContactsTable.COLUMN_FORENAME, contact.forename)
+            put(ContactsTable.COLUMN_SURNAME, contact.surname)
+            put(ContactsTable.COLUMN_COUNTRY, contact.countryID)
+            put(ContactsTable.COLUMN_EMAIL, contact.email)
+            put(ContactsTable.COLUMN_NUMBER, contact.phone)
+            put(ContactsTable.COLUMN_GENDER, contact.gender)
+        }
+
+        return db.insert(ContactsTable.TABLE_NAME, null, contentValues)
+    }
+
+    fun editContact(contact: Contact, id: Int): Int{
+        val db              =   this.writableDatabase
+        val where           =   "${BaseColumns._ID} = ?"
+        val whereArg        =   arrayOf("$id")
+        val contentValues   =   ContentValues().apply{
+            put(ContactsTable.COLUMN_FORENAME, contact.forename)
+            put(ContactsTable.COLUMN_SURNAME, contact.surname)
+            put(ContactsTable.COLUMN_COUNTRY, contact.countryID)
+            put(ContactsTable.COLUMN_EMAIL, contact.email)
+            put(ContactsTable.COLUMN_NUMBER, contact.phone)
+            put(ContactsTable.COLUMN_GENDER, contact.gender)
+        }
+
+        return db.update(
+            ContactsTable.TABLE_NAME,
+            contentValues,
+            where,
+            whereArg
+        )
+    }
+
     fun getContact(id: Int): Contact {
         val db              =   this.readableDatabase
-        val table           =   "${ContactsTable.TABLE_NAME} as contacts INNER JOIN ${CountriesTable.TABLE_NAME} as countries ON ${ContactsTable.COLUMN_COUNTRY} = countries.${BaseColumns._ID}"
+        val table           =   "${ContactsTable.TABLE_NAME} as contacts INNER JOIN ${CountriesTable.TABLE_NAME} as countries " +
+                                "ON ${ContactsTable.COLUMN_COUNTRY} = countries.${BaseColumns._ID}"
         val selection       =   "contacts.${BaseColumns._ID} = ?"
         val selectionArgs   =   arrayOf("$id")
         val projection      =   arrayOf(
@@ -285,41 +321,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
         return countryList
     }
-
-    fun addContact(contact: Contact): Long {
-        val db              =   this.writableDatabase
-        val contentValues   =   ContentValues().apply{
-                                                    put(ContactsTable.COLUMN_FORENAME, contact.forename)
-                                                    put(ContactsTable.COLUMN_SURNAME, contact.surname)
-                                                    put(ContactsTable.COLUMN_COUNTRY, contact.countryID)
-                                                    put(ContactsTable.COLUMN_EMAIL, contact.email)
-                                                    put(ContactsTable.COLUMN_NUMBER, contact.phone)
-                                                    put(ContactsTable.COLUMN_GENDER, contact.gender)
-        }
-
-        return db.insert(ContactsTable.TABLE_NAME, null, contentValues)
-    }
-
-    fun editContact(contact: Contact, id: Int): Int{
-        val db              =   this.writableDatabase
-        val where           =   "${BaseColumns._ID} = ?"
-        val whereArg        =   arrayOf("$id")
-        val contentValues   =   ContentValues().apply{
-                                                        put(ContactsTable.COLUMN_FORENAME, contact.forename)
-                                                        put(ContactsTable.COLUMN_SURNAME, contact.surname)
-                                                        put(ContactsTable.COLUMN_COUNTRY, contact.countryID)
-                                                        put(ContactsTable.COLUMN_EMAIL, contact.email)
-                                                        put(ContactsTable.COLUMN_NUMBER, contact.phone)
-                                                        put(ContactsTable.COLUMN_GENDER, contact.gender)
-        }
-
-        return db.update(
-                            ContactsTable.TABLE_NAME,
-                            contentValues,
-                            where,
-                            whereArg
-        )
-    }
 }
 object ContactsTable : BaseColumns {
     const val TABLE_NAME        =   "Contacts"
@@ -391,7 +392,7 @@ private val countries       = arrayOf(
                             "Kosovo", "Latvia", "Netherlands", "Norway", "Poland", "Portugal", "Romania",
                             "Russia", "Serbia", "Spain", "Switzerland", "Turkey", "United Kingdom"
 )
-private val countrycodes    = arrayOf(
+private val countryCodes    = arrayOf(
                             43, 355, 376, 374, 375, 32, 359, 385, 357, 420, 45, 372, 358, 33, 49, 30,
                             36, 353, 39, 383, 371, 31, 47, 48, 351, 40, 7, 381, 34, 41, 90, 44
 )

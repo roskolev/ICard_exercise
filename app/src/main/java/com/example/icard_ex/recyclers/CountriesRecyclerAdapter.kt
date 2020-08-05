@@ -40,19 +40,23 @@ class CountriesRecyclerAdapter(private val context: Activity, private var countr
     }
 
     inner class ItemViewHolder(itemView: View) :  RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
         init {
             itemView.setOnClickListener(this)
         }
-        var country =   Country()
+
+        private var country =   Country()
+
         fun setRow(country: Country) {
             this.country                = country
             itemView.countryName.text   = country.name
             itemView.countryCode.text   = context.getString(R.string.country_code, country.codeStr)
             itemView.setBackgroundColor(Color.WHITE)
         }
+
         override fun onClick(v: View?) {
-            context.searchCountryDialog.setText(country.name)
             context.searchCountryDialog.id = country.id
+            context.searchCountryDialog.setText(country.name)
             context.editTextPhoneCode.setText(context.getString(R.string.country_code, country.codeStr))
             dialog.dismiss()
         }

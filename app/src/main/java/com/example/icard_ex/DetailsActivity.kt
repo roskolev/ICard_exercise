@@ -79,8 +79,8 @@ class DetailsActivity : AppCompatActivity() {
         }
         else{
             //Set Up device Contact
-            contact = contactsHelper.getDeviceContact(idDevice)
-            numberValue.text = contact.phone
+            contact             =   contactsHelper.getDeviceContact(idDevice)
+            numberValue.text    =   contact.phone
         }
 
         emailValue.text         =   contact.email
