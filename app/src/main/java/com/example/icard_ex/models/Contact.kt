@@ -8,9 +8,9 @@ class Contact() {
     var forename    =   ""
     var surname     =   ""
     var countryID   =   0
-    var gender      =   "N/A"
-    var email       =   "N/A"
-    var phone       =   "N/A"
+    var gender      =   ""
+    var email       =   ""
+    var phone       =   ""
 
     constructor( forename: String, surname: String, email: String, phone: String, gender: String, country: Int) : this(){
         this.forename   =   forename

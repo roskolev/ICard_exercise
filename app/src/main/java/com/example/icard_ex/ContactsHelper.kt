@@ -196,7 +196,7 @@ class ContactsHelper(context: Context) {
         )
         if (deviceContactsCursor != null) {
             while((deviceContactsCursor.moveToNext()))
-                contact.forename = deviceContactsCursor.getString(deviceContactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                contact.fullname = deviceContactsCursor.getString(deviceContactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
         }
 
         deviceContactsCursor?.close()

@@ -1,7 +1,9 @@
 package com.example.icard_ex.recyclers
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -10,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.icard_ex.*
 import com.example.icard_ex.models.Contact
@@ -93,11 +96,16 @@ class ContactsRecyclerAdapter(private val contacts: MutableList<Contact>, privat
             optionsPopup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.actionDelete -> {
-                        dbHelper.deleteContact(contacts[position].id)
-                        contacts.removeAt(position)
-                        notifyItemRemoved(position)
-                        notifyItemRangeChanged(position, contacts.size)
-                        notifyDataSetChanged()
+                        AlertDialog.Builder(ctx).setMessage("Delete ${contacts[position].fullname}?")
+                            .setPositiveButton("Yes") { _, _ ->
+                                dbHelper.deleteContact(contacts[position].id)
+                                contacts.removeAt(position)
+                                notifyItemRemoved(position)
+                                notifyItemRangeChanged(position, contacts.size)
+                                notifyDataSetChanged()
+                            }
+                            .setNegativeButton("No"){_, _ ->
+                            }.show()
                     }
                     R.id.actionEdit -> {
                         if (adapterPosition >= inAppNumber) {

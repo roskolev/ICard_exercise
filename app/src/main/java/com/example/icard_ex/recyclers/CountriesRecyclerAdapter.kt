@@ -55,7 +55,6 @@ class CountriesRecyclerAdapter(private val context: Activity, private var countr
         }
 
         override fun onClick(v: View?) {
-            context.searchCountryDialog.id = country.id
             context.searchCountryDialog.setText(country.name)
             context.editTextPhoneCode.setText(context.getString(R.string.country_code, country.codeStr))
             dialog.dismiss()

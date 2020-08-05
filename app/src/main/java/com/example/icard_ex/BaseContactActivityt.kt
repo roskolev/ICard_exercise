@@ -95,6 +95,17 @@ abstract class BaseContactActivity : AppCompatActivity() {
 
     }
 
+    private fun findCountryByName(name: String): Country {
+        lateinit var countryFound : Country
+
+        countries.forEach { country ->
+            if (country.name == name)
+                countryFound = country
+        }
+
+        return countryFound
+    }
+
     protected fun buildConfirmDialog(errorCode: Long, successString: Int, errorString: Int, titleString: Int){
         val contact = Contact(
             editTextForename.text.toString(),
@@ -102,7 +113,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
             editTextEmailAddress.text.toString(),
             editTextPhone.text.toString(),
             findViewById<RadioButton>(radioSex.checkedRadioButtonId).text.toString(),
-            searchCountryDialog.id
+            findCountryByName(searchCountryDialog.text.toString()).id
         )
 
         AlertDialog.Builder(this)
