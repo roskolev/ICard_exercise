@@ -6,13 +6,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.example.icard_ex.helpers.ContactsHelper
+import com.example.icard_ex.helpers.DatabaseHelper
 import com.example.icard_ex.models.Contact
 import com.example.icard_ex.models.Country
 import kotlinx.android.synthetic.main.activity_details.*
 
 class DetailsActivity : AppCompatActivity() {
-    private lateinit var dbHelper       :   DatabaseHelper
-    private lateinit var contactsHelper :   ContactsHelper
+    private lateinit var dbHelper       : DatabaseHelper
+    private lateinit var contactsHelper : ContactsHelper
     private lateinit var contact        :   Contact
     private var id                      =   -1
     private var idDevice                =   0
@@ -20,8 +22,8 @@ class DetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
 
-        dbHelper        =   DatabaseHelper(this)
-        contactsHelper  =   ContactsHelper(this)
+        dbHelper        = DatabaseHelper(this)
+        contactsHelper  = ContactsHelper(this)
         id              =   intent.getIntExtra(getString(R.string.id), defaultID)
 
         if(id == defaultID)
@@ -39,14 +41,15 @@ class DetailsActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         var isOptionSelected = true
+
         when (item.itemId) {
             R.id.actionDelete   ->  {
-                AlertDialog.Builder(this).setMessage("Delete ${contact.fullname}?")
-                    .setPositiveButton("Yes") { _, _ ->
+                AlertDialog.Builder(this).setMessage(getString(R.string.delete_name, contact.fullname))
+                    .setPositiveButton(R.string.yes) { _, _ ->
                         dbHelper.deleteContact(id)
                         finish()
                     }
-                    .setNegativeButton("No"){_, _ ->
+                    .setNegativeButton(R.string.no){_, _ ->
                     }.show()
             }
             R.id.actionEdit     ->  {
@@ -109,6 +112,7 @@ class DetailsActivity : AppCompatActivity() {
         genderValue.textSize    =   16F
 
     }
+
     companion object {
         const val   defaultID = -1
     }

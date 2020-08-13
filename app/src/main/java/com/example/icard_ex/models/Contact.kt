@@ -11,6 +11,7 @@ class Contact() {
     var gender      =   ""
     var email       =   ""
     var phone       =   ""
+    var inApp       =   false
 
     constructor( forename: String, surname: String, email: String, phone: String, gender: String, country: Int) : this(){
         this.forename   =   forename
@@ -22,9 +23,10 @@ class Contact() {
         this.countryID  =   country
     }
 
-    constructor( fullname: String, id: Int) : this(){
+    constructor( fullname: String, id: Int, inApp: Boolean) : this(){
         this.fullname   = fullname
         this.id         = id
+        this.inApp      = inApp
     }
 
     constructor( forename: String, surname: String, email: String, phone: String, gender: String, country: Country) : this(){

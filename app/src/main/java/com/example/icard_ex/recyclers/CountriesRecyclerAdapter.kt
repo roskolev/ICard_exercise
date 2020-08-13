@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.icard_ex.DatabaseHelper
+import com.example.icard_ex.helpers.DatabaseHelper
 import com.example.icard_ex.R
 import com.example.icard_ex.models.Country
 import kotlinx.android.synthetic.main.activity_base_contact.*
@@ -16,10 +16,11 @@ import kotlinx.android.synthetic.main.country_spinner_row.view.*
 
 class CountriesRecyclerAdapter(private val context: Activity, private var countries: MutableList<Country>, private val dialog: Dialog)
     :RecyclerView.Adapter<CountriesRecyclerAdapter.ItemViewHolder>() {
-    private lateinit var dbHelper   :   DatabaseHelper
+    private lateinit var dbHelper   : DatabaseHelper
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        dbHelper            =   DatabaseHelper(context)
+        dbHelper            =
+            DatabaseHelper(context)
         val countryItemView =   LayoutInflater.from(context).inflate(R.layout.country_spinner_row, parent, false )
 
         return ItemViewHolder(countryItemView)
@@ -55,7 +56,7 @@ class CountriesRecyclerAdapter(private val context: Activity, private var countr
         }
 
         override fun onClick(v: View?) {
-            context.searchCountryDialog.setText(country.name)
+            context.textViewCountry.text = country.name
             context.editTextPhoneCode.setText(context.getString(R.string.country_code, country.codeStr))
             dialog.dismiss()
         }

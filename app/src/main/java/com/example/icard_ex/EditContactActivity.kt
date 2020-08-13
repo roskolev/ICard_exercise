@@ -24,7 +24,7 @@ class EditContactActivity : BaseContactActivity() {
         val contact             =   dbHelper.getContact(contactID)
         val country             =   contact.country
 
-        searchCountryDialog.setText(country.name)
+        textViewCountry.setText(country.name)
         editTextForename.setText(contact.forename)
         editTextSurname.setText(contact.surname)
         editTextEmailAddress.setText(contact.email)

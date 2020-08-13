@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.icard_ex.helpers.DatabaseHelper
 import com.example.icard_ex.models.Contact
 import com.example.icard_ex.models.Country
 import com.example.icard_ex.recyclers.CountriesRecyclerAdapter
@@ -18,7 +19,7 @@ import kotlinx.android.synthetic.main.activity_base_contact.*
 import kotlinx.android.synthetic.main.countries_dialog.*
 
 abstract class BaseContactActivity : AppCompatActivity() {
-    protected lateinit var dbHelper :   DatabaseHelper
+    protected lateinit var dbHelper : DatabaseHelper
     private lateinit var countries  :   MutableList<Country>
     lateinit var dialog             :   Dialog
 
@@ -28,7 +29,9 @@ abstract class BaseContactActivity : AppCompatActivity() {
         dbHelper = DatabaseHelper(this)
 
         setSupportActionBar(toolbarEdit)
-        setUpCountryField()
+
+        editTextPhoneCode.keyListener   =   null
+        initCountriesDialog()
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_action_quit)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
@@ -39,12 +42,12 @@ abstract class BaseContactActivity : AppCompatActivity() {
     }
 
     protected fun validation(): Boolean {
-        val emailPattern    =   "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        val emailPattern    =   "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+(\\.+[a-z]+)*"
         val phonePattern    =   "^[0-9]*$"
         var validated       =   false
 
         when{
-            !dbHelper.countryInDB(searchCountryDialog.text.toString())                                          ->
+            !dbHelper.countryInDB(textViewCountry.text.toString())                                          ->
                 Toast.makeText(this, R.string.country_wrong, Toast.LENGTH_LONG).show()
 
             editTextForename.text.isEmpty() || editTextSurname.text.isEmpty()                                   ->
@@ -66,29 +69,26 @@ abstract class BaseContactActivity : AppCompatActivity() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setUpCountryField() {
-        editTextPhoneCode.keyListener   =   null
-        dialog                          =   Dialog(this)
+    private fun initCountriesDialog() {
+        textViewCountry.setOnTouchListener { _, _ ->
+            dialog                          =   Dialog(this)
 
-        dialog.setContentView(R.layout.countries_dialog)
+            dialog.setContentView(R.layout.countries_dialog)
+            countries                           =   dbHelper.getAllCountries()
+            dialog.countryList.layoutManager    =   LinearLayoutManager(this)
+            dialog.countryList.adapter          =   CountriesRecyclerAdapter(this, countries, dialog)
 
-        countries                           =   dbHelper.getAllCountries()
-        dialog.countryList.layoutManager    =   LinearLayoutManager(this)
-        dialog.countryList.adapter          =   CountriesRecyclerAdapter(this, countries, dialog)
-
-        dialog.setOnDismissListener {
-            dialog.searchCountry.setText("")
-        }
-
-        dialog.searchCountry.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {}
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(partialValue: CharSequence, start: Int, before: Int, count: Int) {
-                (dialog.countryList.adapter as CountriesRecyclerAdapter).updateList(dbHelper.getFilteredCountries(partialValue))
+            dialog.setOnDismissListener {
+                dialog.searchCountry.setText("")
             }
-        })
 
-        searchCountryDialog.setOnTouchListener { _, _ ->
+            dialog.searchCountry.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable) {}
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(partialValue: CharSequence, start: Int, before: Int, count: Int) {
+                    (dialog.countryList.adapter as CountriesRecyclerAdapter).updateList(dbHelper.getFilteredCountries(partialValue))
+                }
+            })
             dialog.show()
             false
         }
@@ -113,7 +113,7 @@ abstract class BaseContactActivity : AppCompatActivity() {
             editTextEmailAddress.text.toString(),
             editTextPhone.text.toString(),
             findViewById<RadioButton>(radioSex.checkedRadioButtonId).text.toString(),
-            findCountryByName(searchCountryDialog.text.toString()).id
+            findCountryByName(textViewCountry.text.toString()).id
         )
 
         AlertDialog.Builder(this)

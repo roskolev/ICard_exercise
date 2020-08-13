@@ -2,17 +2,19 @@ package com.example.icard_ex
 
 import android.os.Bundle
 import android.view.MenuItem
+import com.example.icard_ex.helpers.ContactsHelper
 import com.example.icard_ex.models.Contact
 import kotlinx.android.synthetic.main.activity_base_contact.*
 
-open class AddContactActivity : BaseContactActivity() {
-    private lateinit var contactsHelper :   ContactsHelper
+class AddContactActivity : BaseContactActivity() {
+    private lateinit var contactsHelper : ContactsHelper
     private var contactID               =   0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         radioSex.clearCheck()
-        contactsHelper              =   ContactsHelper(this)
+        contactsHelper              =
+            ContactsHelper(this)
         supportActionBar?.title     =   getString(R.string.new_contact)
         contactID                   =   intent.getIntExtra(getString(R.string.device_id), -1)
 
@@ -53,6 +55,7 @@ open class AddContactActivity : BaseContactActivity() {
         if(contact.email != getString(R.string.NA))
             editTextEmailAddress.setText(contact.email)
     }
+
     companion object {
         const val   defaultID = -1
     }

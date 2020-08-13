@@ -1,4 +1,4 @@
-package com.example.icard_ex
+package com.example.icard_ex.helpers
 
 import android.content.ContentValues
 import android.content.Context
@@ -8,7 +8,10 @@ import android.provider.BaseColumns
 import com.example.icard_ex.models.Contact
 import com.example.icard_ex.models.Country
 
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context,
+    DATABASE_NAME, null,
+    DATABASE_VERSION
+) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(SQL_CREATE_TABLE_CONTACTS)
         db.execSQL(SQL_CREATE_TABLE_COUNTRIES)
@@ -39,10 +42,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getAllContacts(): MutableList<Contact> {
         val contactList =   mutableListOf<Contact>()
         val db          =   this.readableDatabase
-        val projection  =   arrayOf(BaseColumns._ID, ContactsTable.COLUMN_FORENAME, ContactsTable.COLUMN_SURNAME)
+        val projection  =   arrayOf(BaseColumns._ID,
+            ContactsTable.COLUMN_FORENAME,
+            ContactsTable.COLUMN_SURNAME
+        )
         val sortOrder   =   "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
         val cursor      =   db.query(
-                                    ContactsTable.TABLE_NAME,
+            ContactsTable.TABLE_NAME,
                                     projection,
                                     null,
                                     null,
@@ -57,7 +63,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id)
+                contactList.add(Contact("$forename $surname", id, true)
                 )
             }
         }
@@ -68,12 +74,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getMaleContacts(): MutableList<Contact> {
         val contactList     =   mutableListOf<Contact>()
         val db              =   this.readableDatabase
-        val projection      =   arrayOf(BaseColumns._ID, ContactsTable.COLUMN_FORENAME, ContactsTable.COLUMN_SURNAME)
+        val projection      =   arrayOf(BaseColumns._ID,
+            ContactsTable.COLUMN_FORENAME,
+            ContactsTable.COLUMN_SURNAME
+        )
         val sortOrder       =   "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
         val selection       =   "${ContactsTable.COLUMN_GENDER} = ?"
         val selectionArgs   =   arrayOf("Male")
         val cursor          =   db.query(
-                                        ContactsTable.TABLE_NAME,
+            ContactsTable.TABLE_NAME,
                                         projection,
                                         selection,
                                         selectionArgs,
@@ -88,7 +97,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id)
+                contactList.add(Contact("$forename $surname", id, true)
                 )
             }
         }
@@ -99,12 +108,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getFemaleContacts(): MutableList<Contact> {
         val contactList     =   mutableListOf<Contact>()
         val db              =   this.readableDatabase
-        val projection      =   arrayOf(BaseColumns._ID, ContactsTable.COLUMN_FORENAME, ContactsTable.COLUMN_SURNAME)
+        val projection      =   arrayOf(BaseColumns._ID,
+            ContactsTable.COLUMN_FORENAME,
+            ContactsTable.COLUMN_SURNAME
+        )
         val sortOrder       =   "${ContactsTable.COLUMN_FORENAME} ASC, " + "${ContactsTable.COLUMN_SURNAME} ASC"
         val selection       =   "${ContactsTable.COLUMN_GENDER} = ?"
         val selectionArgs   =   arrayOf("Female")
         val cursor          =   db.query(
-                                        ContactsTable.TABLE_NAME,
+            ContactsTable.TABLE_NAME,
                                         projection,
                                         selection,
                                         selectionArgs,
@@ -119,7 +131,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val surname     =   getString(getColumnIndexOrThrow(ContactsTable.COLUMN_SURNAME))
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
-                contactList.add(Contact("$forename $surname", id)
+                contactList.add(Contact("$forename $surname", id, true)
                 )
             }
         }
@@ -150,7 +162,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 val id          =   getInt(getColumnIndexOrThrow(BaseColumns._ID))
 
                 contactList.add(
-                    Contact("$forename $surname", id)
+                    Contact("$forename $surname", id, true)
                 )
             }
         }
@@ -205,13 +217,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val selection       =   "contacts.${BaseColumns._ID} = ?"
         val selectionArgs   =   arrayOf("$id")
         val projection      =   arrayOf(
-                                            ContactsTable.COLUMN_FORENAME,
-                                            ContactsTable.COLUMN_SURNAME,
-                                            ContactsTable.COLUMN_EMAIL,
-                                            ContactsTable.COLUMN_GENDER,
-                                            ContactsTable.COLUMN_NUMBER,
-                                            CountriesTable.COLUMN_NAME,
-                                            CountriesTable.COLUMN_CODE,
+            ContactsTable.COLUMN_FORENAME,
+            ContactsTable.COLUMN_SURNAME,
+            ContactsTable.COLUMN_EMAIL,
+            ContactsTable.COLUMN_GENDER,
+            ContactsTable.COLUMN_NUMBER,
+            CountriesTable.COLUMN_NAME,
+            CountriesTable.COLUMN_CODE,
                                             "countries.${BaseColumns._ID}"
         )
         val cursor          =   db.query(
@@ -245,10 +257,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getAllCountries(): MutableList<Country>{
         val countryList =   mutableListOf<Country>()
         val db          =   this.readableDatabase
-        val projection  =   arrayOf(BaseColumns._ID, CountriesTable.COLUMN_NAME, CountriesTable.COLUMN_CODE)
+        val projection  =   arrayOf(BaseColumns._ID,
+            CountriesTable.COLUMN_NAME,
+            CountriesTable.COLUMN_CODE
+        )
         val sortOrder   =   "${CountriesTable.COLUMN_NAME} ASC"
         val cursor      =   db.query(
-                                        CountriesTable.TABLE_NAME,
+            CountriesTable.TABLE_NAME,
                                         projection,
                                         null,
                                         null,
@@ -276,7 +291,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val selection       =   "${CountriesTable.COLUMN_NAME} = ?"
         val selectionArgs   =   arrayOf(country)
         val cursor          =   db.query(
-                                            CountriesTable.TABLE_NAME,
+            CountriesTable.TABLE_NAME,
                                             projection,
                                             selection,
                                             selectionArgs,
@@ -296,12 +311,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getFilteredCountries(partialValue: CharSequence): MutableList<Country> {
         val countryList             =   mutableListOf<Country>()
         val db                      =   this.readableDatabase
-        val projection              =   arrayOf(BaseColumns._ID, CountriesTable.COLUMN_NAME, CountriesTable.COLUMN_CODE)
+        val projection              =   arrayOf(BaseColumns._ID,
+            CountriesTable.COLUMN_NAME,
+            CountriesTable.COLUMN_CODE
+        )
         val selection               =   "${CountriesTable.COLUMN_NAME} LIKE ?"
         val selectionArgs           =   arrayOf("$partialValue%")
         val sortOrder               =   "${CountriesTable.COLUMN_NAME} ASC"
         val cursor                  =   db.query(
-                                                CountriesTable.TABLE_NAME,
+            CountriesTable.TABLE_NAME,
                                                 projection,
                                                 selection,
                                                 selectionArgs,
